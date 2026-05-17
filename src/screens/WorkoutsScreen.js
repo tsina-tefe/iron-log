@@ -1,54 +1,132 @@
-import { View, ScrollView, StyleSheet } from "react-native";
-import { colors, spacing } from "../theme";
-import Button from "../components/Button";
+import { useState, useCallback } from "react";
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+} from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
+import { Ionicons } from "@expo/vector-icons";
+import { colors, spacing, typography, font, borderRadius } from "../theme";
+import { getAllTemplates, deleteTemplate } from "../db/templates";
 import WorkoutCard from "../components/WorkoutCard";
-import StatBox from "../components/StatBox";
-import SetRow from "../components/SetRow";
 import EmptyState from "../components/EmptyState";
 
-export default function WorkoutsScreen() {
+export default function WorkoutsScreen({ navigation }) {
+  const [templates, setTemplates] = useState([]);
+
+  useFocusEffect(
+    useCallback(() => {
+      getAllTemplates().then(setTemplates);
+    }, []),
+  );
+
+  function handleDelete(template) {
+    Alert.alert(
+      "Delete Plan",
+      `Delete "${template.name}"? This cannot be undone.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            await deleteTemplate(template.id);
+            setTemplates((prev) => prev.filter((t) => t.id !== template.id));
+          },
+        },
+      ],
+    );
+  }
+
   return (
-    <ScrollView
-      style={styles.screen}
-      contentContainerStyle={{ padding: spacing.md, gap: spacing.md }}
-    >
-      <View style={{ flexDirection: "row", gap: spacing.sm }}>
-        <StatBox label="Total Sessions" value="12" />
-        <StatBox label="This Month" value="4" accent />
+    <View style={styles.screen}>
+      {/* Header */}
+      <View style={styles.header}>
+        <View>
+          <Text style={styles.title}>My Workouts</Text>
+          <Text style={styles.sub}>{templates.length} plans</Text>
+        </View>
+        <TouchableOpacity
+          style={styles.newBtn}
+          onPress={() => navigation.navigate("CreateWorkout")}
+        >
+          <Ionicons name="add" size={20} color={colors.background} />
+          <Text style={styles.newLabel}>New</Text>
+        </TouchableOpacity>
       </View>
-      <WorkoutCard
-        name="Push Day"
-        exerciseCount={6}
-        color="#D0FD3E"
-        onPress={() => {}}
+
+      {/* Plans list */}
+      <FlatList
+        data={templates}
+        keyExtractor={(item) => String(item.id)}
+        contentContainerStyle={styles.list}
+        ListEmptyComponent={
+          <EmptyState
+            icon="barbell-outline"
+            title="No plans yet"
+            subtitle="Tap New to create your first workout plan"
+          />
+        }
+        renderItem={({ item }) => (
+          <WorkoutCard
+            name={item.name}
+            exerciseCount={item.exerciseCount}
+            color={item.color}
+            onPress={() =>
+              navigation.navigate("CreateWorkout", { template: item })
+            }
+            onLongPress={() => handleDelete(item)}
+          />
+        )}
       />
-      <WorkoutCard
-        name="Pull Day"
-        exerciseCount={5}
-        color="#0A84FF"
-        onPress={() => {}}
-      />
-      <SetRow
-        setNumber={1}
-        weightKg="80"
-        reps="8"
-        completed={false}
-        onComplete={() => {}}
-      />
-      <SetRow
-        setNumber={2}
-        weightKg="80"
-        reps="6"
-        completed
-        onComplete={() => {}}
-      />
-      <Button label="Save Session" onPress={() => {}} />
-      <Button label="Ghost Button" variant="ghost" onPress={() => {}} />
-      <Button label="End Session" variant="danger" onPress={() => {}} />
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
+  screen: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingTop: spacing.xxl,
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.lg,
+  },
+  title: {
+    ...font("bold"),
+    fontSize: typography.xxl,
+    color: colors.textPrimary,
+  },
+  sub: {
+    ...font("regular"),
+    fontSize: typography.sm,
+    color: colors.textSecondary,
+    marginTop: 2,
+  },
+  newBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.xs,
+    backgroundColor: colors.primary,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.full,
+  },
+  newLabel: {
+    ...font("bold"),
+    fontSize: typography.sm,
+    color: colors.background,
+  },
+  list: {
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.xl,
+    flexGrow: 1,
+  },
 });

@@ -18,7 +18,7 @@ import {
   borderRadius,
   cardStyle,
 } from "../theme";
-import { getAllTemplates } from "../db/templates";
+import { getAllTemplates, getTemplateWithExercises } from "../db/templates";
 import useActiveSessionStore from "../store/useActiveSessionStore";
 import EmptyState from "../components/EmptyState";
 
@@ -33,7 +33,7 @@ export default function PickTemplateScreen({ navigation }) {
     }, []),
   );
 
-  function handlePick(template) {
+  async function handlePick(template) {
     if (activeTemplateId) {
       Alert.alert(
         "Active Workout",
@@ -49,7 +49,8 @@ export default function PickTemplateScreen({ navigation }) {
       return;
     }
 
-    startSession(template);
+    const fullTemplate = await getTemplateWithExercises(template.id);
+    startSession(fullTemplate);
     navigation.navigate("ActiveSession");
   }
 

@@ -14,9 +14,15 @@ export default function WorkoutCard({
   exerciseCount,
   color = colors.primary,
   onPress,
+  onLongPress,
 }) {
   return (
-    <TouchableOpacity onPress={onPress} activeOpacity={0.7} style={styles.card}>
+    <TouchableOpacity
+      onPress={onPress}
+      onLongPress={onLongPress}
+      activeOpacity={0.7}
+      style={styles.card}
+    >
       <View style={[styles.iconCircle, { backgroundColor: color + "22" }]}>
         <Ionicons name="barbell-outline" size={20} color={color} />
       </View>
