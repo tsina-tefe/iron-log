@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
@@ -10,25 +10,32 @@ import {
 } from "@expo-google-fonts/inter";
 import * as SplashScreen from "expo-splash-screen";
 import RootNavigator from "./src/navigation/RootNavigator";
+import { initDb } from "./src/db/client";
 
-// Keep splash screen visible until fonts are ready
 SplashScreen.preventAutoHideAsync();
 
 export default function App() {
+  const [dbReady, setDbReady] = useState(false);
+
   const [fontsLoaded] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
     Inter_700Bold,
   });
 
+  useEffect(() => {
+    initDb()
+      .then(() => setDbReady(true))
+      .catch((err) => console.error("DB init failed:", err));
+  }, []);
+
   const onLayoutRootView = useCallback(async () => {
-    if (fontsLoaded) {
+    if (fontsLoaded && dbReady) {
       await SplashScreen.hideAsync();
     }
-  }, [fontsLoaded]);
+  }, [fontsLoaded, dbReady]);
 
-  // Don't render anything until fonts are loaded
-  if (!fontsLoaded) return null;
+  if (!fontsLoaded || !dbReady) return null;
 
   return (
     <SafeAreaProvider>
