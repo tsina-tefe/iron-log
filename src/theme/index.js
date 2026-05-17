@@ -22,7 +22,6 @@ export const colors = {
   border: "#2C2C2E",
   borderLight: "#3A3A3C",
 
-  // Template color dots (for workout plan cards)
   templateColors: [
     "#D0FD3E",
     "#0A84FF",
@@ -57,7 +56,7 @@ export const typography = {
   medium: "500",
   bold: "700",
 
-  // Fonts (used after Inter loads)
+  // Fonts
   fontRegular: "Inter_400Regular",
   fontMedium: "Inter_500Medium",
   fontBold: "Inter_700Bold",
@@ -96,3 +95,12 @@ export const cardStyle = {
   borderColor: colors.border,
   padding: spacing.md,
 };
+
+export const font = (weight = "regular") => ({
+  fontFamily:
+    {
+      regular: "Inter_400Regular",
+      medium: "Inter_500Medium",
+      bold: "Inter_700Bold",
+    }[weight] ?? "Inter_400Regular",
+});
