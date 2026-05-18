@@ -13,6 +13,8 @@ import { colors, spacing, typography, font, borderRadius } from "../theme";
 import { getAllTemplates, deleteTemplate } from "../db/templates";
 import WorkoutCard from "../components/WorkoutCard";
 import EmptyState from "../components/EmptyState";
+import { Animated } from "react-native";
+import useFadeIn from "../hooks/useFadeIn";
 
 export default function WorkoutsScreen({ navigation }) {
   const [templates, setTemplates] = useState([]);
@@ -41,9 +43,12 @@ export default function WorkoutsScreen({ navigation }) {
     );
   }
 
+  const { opacity, translateY } = useFadeIn();
+
   return (
-    <View style={styles.screen}>
-      {/* Header */}
+    <Animated.View
+      style={[styles.screen, { opacity, transform: [{ translateY }] }]}
+    >
       <View style={styles.header}>
         <View>
           <Text style={styles.title}>My Workouts</Text>
@@ -58,7 +63,6 @@ export default function WorkoutsScreen({ navigation }) {
         </TouchableOpacity>
       </View>
 
-      {/* Plans list */}
       <FlatList
         data={templates}
         keyExtractor={(item) => String(item.id)}
@@ -82,7 +86,7 @@ export default function WorkoutsScreen({ navigation }) {
           />
         )}
       />
-    </View>
+    </Animated.View>
   );
 }
 

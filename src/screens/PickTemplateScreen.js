@@ -21,6 +21,8 @@ import {
 import { getAllTemplates, getTemplateWithExercises } from "../db/templates";
 import useActiveSessionStore from "../store/useActiveSessionStore";
 import EmptyState from "../components/EmptyState";
+import { Animated } from "react-native";
+import useFadeIn from "../hooks/useFadeIn";
 
 export default function PickTemplateScreen({ navigation }) {
   const [templates, setTemplates] = useState([]);
@@ -53,10 +55,12 @@ export default function PickTemplateScreen({ navigation }) {
     startSession(fullTemplate);
     navigation.navigate("ActiveSession");
   }
+  const { opacity, translateY } = useFadeIn();
 
   return (
-    <View style={styles.screen}>
-      {/* Header */}
+    <Animated.View
+      style={[styles.screen, { opacity, transform: [{ translateY }] }]}
+    >
       <View style={styles.header}>
         <Text style={styles.title}>Start Workout</Text>
         <Text style={styles.sub}>Choose a plan to begin</Text>
@@ -92,7 +96,7 @@ export default function PickTemplateScreen({ navigation }) {
           </TouchableOpacity>
         )}
       />
-    </View>
+    </Animated.View>
   );
 }
 

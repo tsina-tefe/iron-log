@@ -19,6 +19,8 @@ import { getAllSessions } from "../db/sessions";
 import { groupSessionsByWeek } from "../utils/calculations";
 import { formatElapsed, formatShortDate } from "../utils/formatTime";
 import EmptyState from "../components/EmptyState";
+import { Animated } from "react-native";
+import useFadeIn from "../hooks/useFadeIn";
 
 const FILTERS = ["All", "This week", "This month"];
 
@@ -53,16 +55,17 @@ export default function HistoryScreen({ navigation }) {
   }
 
   const sections = groupSessionsByWeek(applyFilter(sessions));
+  const { opacity, translateY } = useFadeIn();
 
   return (
-    <View style={styles.screen}>
-      {/* Header */}
+    <Animated.View
+      style={[styles.screen, { opacity, transform: [{ translateY }] }]}
+    >
       <View style={styles.header}>
         <Text style={styles.title}>History</Text>
         <Text style={styles.sub}>Your past sessions</Text>
       </View>
 
-      {/* Filter pills */}
       <View style={styles.filters}>
         {FILTERS.map((f) => (
           <TouchableOpacity
@@ -103,13 +106,11 @@ export default function HistoryScreen({ navigation }) {
                 navigation.navigate("SessionDetail", { sessionId: item.id })
               }
             >
-              {/* Date block */}
               <View style={styles.dateBlock}>
                 <Text style={styles.dateDay}>{day}</Text>
                 <Text style={styles.dateMonth}>{month}</Text>
               </View>
 
-              {/* Session info */}
               <View style={styles.cardBody}>
                 <Text style={styles.cardName}>{item.templateName}</Text>
                 <Text style={styles.cardMeta}>
@@ -126,7 +127,7 @@ export default function HistoryScreen({ navigation }) {
           );
         }}
       />
-    </View>
+    </Animated.View>
   );
 }
 

@@ -30,6 +30,8 @@ import { calculateStreak } from "../utils/calculations";
 import { formatDate } from "../utils/formatTime";
 import StatBox from "../components/StatBox";
 import EmptyState from "../components/EmptyState";
+import { Animated } from "react-native";
+import useFadeIn from "../hooks/useFadeIn";
 
 export default function ProgressScreen() {
   const [exercises, setExercises] = useState([]);
@@ -52,7 +54,6 @@ export default function ProgressScreen() {
       getAllPersonalRecords(),
     ]);
 
-    // Only show exercises that have been logged at least once
     const loggedIds = new Set(allPrs.map((p) => p.exerciseId));
     const loggedExercises = allEx.filter((e) => loggedIds.has(e.id));
 
@@ -69,7 +70,6 @@ export default function ProgressScreen() {
     setPrs(allPrs);
     setThisMonth(monthCount);
 
-    // Auto-select first exercise
     if (loggedExercises.length > 0 && !selectedEx) {
       handleSelectExercise(loggedExercises[0]);
     }
@@ -78,7 +78,6 @@ export default function ProgressScreen() {
   async function handleSelectExercise(ex) {
     setSelectedEx(ex);
     const progress = await getProgressForExercise(ex.id);
-    // Shape data for Victory: {x: index, y: maxWeight, date: label}
     const shaped = progress.map((p, i) => ({
       x: i + 1,
       y: p.maxWeight,
@@ -88,24 +87,24 @@ export default function ProgressScreen() {
   }
 
   const streak = calculateStreak(sessions);
+  const { opacity, translateY } = useFadeIn();
 
   return (
-    <View style={styles.screen}>
-      {/* Header */}
+    <Animated.View
+      style={[styles.screen, { opacity, transform: [{ translateY }] }]}
+    >
       <View style={styles.header}>
         <Text style={styles.title}>Progress</Text>
         <Text style={styles.sub}>Track your gains</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll}>
-        {/* Summary stats */}
         <View style={styles.statsRow}>
           <StatBox label="Total Sessions" value={String(sessions.length)} />
           <StatBox label="This Month" value={String(thisMonth)} accent />
           <StatBox label="Best Streak" value={`${streak}🔥`} />
         </View>
 
-        {/* Chart section */}
         <Text style={styles.sectionLabel}>LIFT PROGRESS</Text>
 
         {exercises.length === 0 ? (
@@ -120,7 +119,6 @@ export default function ProgressScreen() {
           </View>
         ) : (
           <>
-            {/* Exercise picker */}
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -147,7 +145,6 @@ export default function ProgressScreen() {
               ))}
             </ScrollView>
 
-            {/* Chart */}
             <View style={styles.chartCard}>
               {chartData.length < 2 ? (
                 <View style={styles.chartEmpty}>
@@ -228,7 +225,6 @@ export default function ProgressScreen() {
           </>
         )}
 
-        {/* Personal Records */}
         <Text style={styles.sectionLabel}>PERSONAL RECORDS</Text>
 
         {prs.length === 0 ? (
@@ -262,7 +258,7 @@ export default function ProgressScreen() {
 
         <View style={{ height: spacing.xxl }} />
       </ScrollView>
-    </View>
+    </Animated.View>
   );
 }
 
