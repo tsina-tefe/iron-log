@@ -62,6 +62,28 @@ export default function ActiveSessionScreen({ navigation }) {
   }, [restSecondsLeft]);
 
   async function handleCompleteSet(exerciseId, setIndex) {
+    const exercise = exercises.find((ex) => ex.exerciseId === exerciseId);
+    const set = exercise?.sets[setIndex];
+
+    const weight = parseFloat(set?.weightKg);
+    const reps = parseInt(set?.reps);
+
+    if (!weight || weight <= 0) {
+      Alert.alert(
+        "Missing weight",
+        "Enter a weight greater than 0 before completing this set.",
+      );
+      return;
+    }
+
+    if (!reps || reps <= 0) {
+      Alert.alert(
+        "Missing reps",
+        "Enter reps greater than 0 before completing this set.",
+      );
+      return;
+    }
+
     completeSet(exerciseId, setIndex);
     await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   }
