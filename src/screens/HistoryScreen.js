@@ -21,16 +21,21 @@ import { formatElapsed, formatShortDate } from "../utils/formatTime";
 import EmptyState from "../components/EmptyState";
 import { Animated } from "react-native";
 import useFadeIn from "../hooks/useFadeIn";
+import Loader from "../components/Loader";
 
 const FILTERS = ["All", "This week", "This month"];
 
 export default function HistoryScreen({ navigation }) {
   const [sessions, setSessions] = useState([]);
   const [filter, setFilter] = useState("All");
+  const [loading, setLoading] = useState(true);
 
   useFocusEffect(
     useCallback(() => {
-      getAllSessions().then(setSessions);
+      setLoading(true);
+      getAllSessions()
+        .then(setSessions)
+        .finally(() => setLoading(false));
     }, []),
   );
 
@@ -56,6 +61,8 @@ export default function HistoryScreen({ navigation }) {
 
   const sections = groupSessionsByWeek(applyFilter(sessions));
   const { opacity, translateY } = useFadeIn();
+
+  if (loading) return <Loader />;
 
   return (
     <Animated.View

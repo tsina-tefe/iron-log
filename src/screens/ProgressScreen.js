@@ -32,6 +32,7 @@ import StatBox from "../components/StatBox";
 import EmptyState from "../components/EmptyState";
 import { Animated } from "react-native";
 import useFadeIn from "../hooks/useFadeIn";
+import Loader from "../components/Loader";
 
 export default function ProgressScreen() {
   const [exercises, setExercises] = useState([]);
@@ -40,10 +41,12 @@ export default function ProgressScreen() {
   const [prs, setPrs] = useState([]);
   const [sessions, setSessions] = useState([]);
   const [thisMonth, setThisMonth] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useFocusEffect(
     useCallback(() => {
-      loadAll();
+      setLoading(true);
+      loadAll().finally(() => setLoading(false));
     }, []),
   );
 
@@ -88,6 +91,8 @@ export default function ProgressScreen() {
 
   const streak = calculateStreak(sessions);
   const { opacity, translateY } = useFadeIn();
+
+  if (loading) return <Loader />;
 
   return (
     <Animated.View

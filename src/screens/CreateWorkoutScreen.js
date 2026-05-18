@@ -9,6 +9,8 @@ import {
   StyleSheet,
   Alert,
   Modal,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import {
@@ -43,7 +45,6 @@ export default function CreateWorkoutScreen({ navigation, route }) {
   const [search, setSearch] = useState("");
   const [saving, setSaving] = useState(false);
 
-  // Load exercises for picker
   useCallback(() => {
     getAllExercises().then(setAllExercises);
     if (existing) {
@@ -92,151 +93,159 @@ export default function CreateWorkoutScreen({ navigation, route }) {
   }
 
   return (
-    <View style={styles.screen}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="chevron-back" size={24} color={colors.textPrimary} />
-        </TouchableOpacity>
-        <Text style={styles.title}>{existing ? "Edit Plan" : "New Plan"}</Text>
-        <View style={{ width: 24 }} />
-      </View>
-
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        keyboardShouldPersistTaps="handled"
-      >
-        {/* Plan name */}
-        <Text style={styles.label}>Plan Name</Text>
-        <TextInput
-          style={styles.input}
-          value={name}
-          onChangeText={setName}
-          placeholder="e.g. Push Day"
-          placeholderTextColor={colors.textMuted}
-        />
-
-        {/* Color picker */}
-        <Text style={styles.label}>Color</Text>
-        <View style={styles.colorRow}>
-          {TEMPLATE_COLORS.map((c) => (
-            <TouchableOpacity
-              key={c}
-              onPress={() => setColor(c)}
-              style={[
-                styles.colorDot,
-                { backgroundColor: c },
-                color === c && styles.colorDotActive,
-              ]}
-            />
-          ))}
-        </View>
-
-        {/* Exercises */}
-        <View style={styles.exHeader}>
-          <Text style={styles.label}>Exercises ({exercises.length})</Text>
-          <TouchableOpacity onPress={() => setPickerVisible(true)}>
-            <Text style={styles.addExLabel}>+ Add</Text>
-          </TouchableOpacity>
-        </View>
-
-        {exercises.length === 0 ? (
-          <TouchableOpacity
-            style={styles.emptyEx}
-            onPress={() => setPickerVisible(true)}
-          >
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <View style={styles.screen}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
             <Ionicons
-              name="add-circle-outline"
-              size={28}
-              color={colors.textMuted}
+              name="chevron-back"
+              size={24}
+              color={colors.textPrimary}
             />
-            <Text style={styles.emptyExText}>Tap to add exercises</Text>
           </TouchableOpacity>
-        ) : (
-          exercises.map((ex, i) => (
-            <View key={ex.id} style={styles.exRow}>
-              <View style={styles.exRowLeft}>
-                <Text style={styles.exNum}>{i + 1}</Text>
-                <View>
-                  <Text style={styles.exName}>{ex.name}</Text>
-                  <Text style={styles.exMuscle}>{ex.muscleGroup}</Text>
-                </View>
-              </View>
-              <TouchableOpacity onPress={() => toggleExercise(ex)}>
-                <Ionicons
-                  name="close-circle"
-                  size={22}
-                  color={colors.textMuted}
-                />
-              </TouchableOpacity>
-            </View>
-          ))
-        )}
+          <Text style={styles.title}>
+            {existing ? "Edit Plan" : "New Plan"}
+          </Text>
+          <View style={{ width: 24 }} />
+        </View>
 
-        <View style={{ height: spacing.xl }} />
-        <Button
-          label="Save Plan"
-          onPress={handleSave}
-          loading={saving}
-          size="lg"
-        />
-        <View style={{ height: spacing.xxl }} />
-      </ScrollView>
-
-      {/* Exercise Picker Modal */}
-      <Modal
-        visible={pickerVisible}
-        animationType="slide"
-        presentationStyle="pageSheet"
-      >
-        <View style={styles.modal}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Add Exercises</Text>
-            <TouchableOpacity onPress={() => setPickerVisible(false)}>
-              <Text style={styles.modalDone}>Done</Text>
-            </TouchableOpacity>
-          </View>
-
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          keyboardShouldPersistTaps="handled"
+        >
+          <Text style={styles.label}>Plan Name</Text>
           <TextInput
-            style={styles.search}
-            value={search}
-            onChangeText={setSearch}
-            placeholder="Search exercises..."
+            style={styles.input}
+            value={name}
+            onChangeText={setName}
+            placeholder="e.g. Push Day"
             placeholderTextColor={colors.textMuted}
           />
 
-          <FlatList
-            data={filtered}
-            keyExtractor={(item) => String(item.id)}
-            contentContainerStyle={{ padding: spacing.md }}
-            renderItem={({ item }) => {
-              const selected = !!exercises.find((e) => e.id === item.id);
-              return (
-                <TouchableOpacity
-                  style={[
-                    styles.pickerRow,
-                    selected && styles.pickerRowSelected,
-                  ]}
-                  onPress={() => toggleExercise(item)}
-                >
-                  <View style={styles.pickerLeft}>
-                    <Text style={styles.pickerName}>{item.name}</Text>
-                    <Text style={styles.pickerMuscle}>{item.muscleGroup}</Text>
+          <Text style={styles.label}>Color</Text>
+          <View style={styles.colorRow}>
+            {TEMPLATE_COLORS.map((c) => (
+              <TouchableOpacity
+                key={c}
+                onPress={() => setColor(c)}
+                style={[
+                  styles.colorDot,
+                  { backgroundColor: c },
+                  color === c && styles.colorDotActive,
+                ]}
+              />
+            ))}
+          </View>
+
+          <View style={styles.exHeader}>
+            <Text style={styles.label}>Exercises ({exercises.length})</Text>
+            <TouchableOpacity onPress={() => setPickerVisible(true)}>
+              <Text style={styles.addExLabel}>+ Add</Text>
+            </TouchableOpacity>
+          </View>
+
+          {exercises.length === 0 ? (
+            <TouchableOpacity
+              style={styles.emptyEx}
+              onPress={() => setPickerVisible(true)}
+            >
+              <Ionicons
+                name="add-circle-outline"
+                size={28}
+                color={colors.textMuted}
+              />
+              <Text style={styles.emptyExText}>Tap to add exercises</Text>
+            </TouchableOpacity>
+          ) : (
+            exercises.map((ex, i) => (
+              <View key={ex.id} style={styles.exRow}>
+                <View style={styles.exRowLeft}>
+                  <Text style={styles.exNum}>{i + 1}</Text>
+                  <View>
+                    <Text style={styles.exName}>{ex.name}</Text>
+                    <Text style={styles.exMuscle}>{ex.muscleGroup}</Text>
                   </View>
-                  {selected && (
-                    <Ionicons
-                      name="checkmark-circle"
-                      size={22}
-                      color={colors.primary}
-                    />
-                  )}
+                </View>
+                <TouchableOpacity onPress={() => toggleExercise(ex)}>
+                  <Ionicons
+                    name="close-circle"
+                    size={22}
+                    color={colors.textMuted}
+                  />
                 </TouchableOpacity>
-              );
-            }}
+              </View>
+            ))
+          )}
+
+          <View style={{ height: spacing.xl }} />
+          <Button
+            label="Save Plan"
+            onPress={handleSave}
+            loading={saving}
+            size="lg"
           />
-        </View>
-      </Modal>
-    </View>
+          <View style={{ height: spacing.xxl }} />
+        </ScrollView>
+
+        <Modal
+          visible={pickerVisible}
+          animationType="slide"
+          presentationStyle="pageSheet"
+        >
+          <View style={styles.modal}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Add Exercises</Text>
+              <TouchableOpacity onPress={() => setPickerVisible(false)}>
+                <Text style={styles.modalDone}>Done</Text>
+              </TouchableOpacity>
+            </View>
+
+            <TextInput
+              style={styles.search}
+              value={search}
+              onChangeText={setSearch}
+              placeholder="Search exercises..."
+              placeholderTextColor={colors.textMuted}
+            />
+
+            <FlatList
+              data={filtered}
+              keyExtractor={(item) => String(item.id)}
+              contentContainerStyle={{ padding: spacing.md }}
+              renderItem={({ item }) => {
+                const selected = !!exercises.find((e) => e.id === item.id);
+                return (
+                  <TouchableOpacity
+                    style={[
+                      styles.pickerRow,
+                      selected && styles.pickerRowSelected,
+                    ]}
+                    onPress={() => toggleExercise(item)}
+                  >
+                    <View style={styles.pickerLeft}>
+                      <Text style={styles.pickerName}>{item.name}</Text>
+                      <Text style={styles.pickerMuscle}>
+                        {item.muscleGroup}
+                      </Text>
+                    </View>
+                    {selected && (
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={22}
+                        color={colors.primary}
+                      />
+                    )}
+                  </TouchableOpacity>
+                );
+              }}
+            />
+          </View>
+        </Modal>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 

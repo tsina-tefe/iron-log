@@ -23,15 +23,20 @@ import useActiveSessionStore from "../store/useActiveSessionStore";
 import EmptyState from "../components/EmptyState";
 import { Animated } from "react-native";
 import useFadeIn from "../hooks/useFadeIn";
+import Loader from "../components/Loader";
 
 export default function PickTemplateScreen({ navigation }) {
   const [templates, setTemplates] = useState([]);
   const { templateId: activeTemplateId, startSession } =
     useActiveSessionStore();
+  const [loading, setLoading] = useState(true);
 
   useFocusEffect(
     useCallback(() => {
-      getAllTemplates().then(setTemplates);
+      setLoading(true);
+      getAllTemplates()
+        .then(setTemplates)
+        .finally(() => setLoading(false));
     }, []),
   );
 
@@ -56,6 +61,7 @@ export default function PickTemplateScreen({ navigation }) {
     navigation.navigate("ActiveSession");
   }
   const { opacity, translateY } = useFadeIn();
+  if (loading) return <Loader />;
 
   return (
     <Animated.View
